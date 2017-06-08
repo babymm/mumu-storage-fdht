@@ -1,62 +1,5 @@
-摘要: FastDHT 是一个高性能的分布式哈希系统 (DHT) ，使用 Berkeley DB 做数据存储，使用 libevent 做网络IO处理，提供 Java 版的客户端接口包。适合用来存储用户在线、会话等小数据量信息。
- FastDHT介绍
-
-    FastDHT 是一个高性能的分布式哈希系统 (DHT) ，使用 Berkeley DB 做数据存储，使用 libevent 做网络IO处理，提供 Java 版的客户端接口包。适合用来存储用户在线、会话等小数据量信息。
-
-     FastDHT存储Key Value Pair支持两种存储方式:缓存方式的MPOOL和持久存储方式的BDB。Key包括三部分：Namespace, ObjectID和Key。 Key可设置过期时间，自动清除过期数据.Server端划分group，同group数据互相备份，并且可自动压缩binlog.服务端可使用单线程，多线程模式。
-
-     FastDHT一些特性:
-
-    虚拟farm，便于扩容;
-
-    分布式算法client端实现，不需要中心服务器;
-
-    二进制通信协议，支持Proxy;
-
-    使用libevent，异步IO方式，支持大并发;
-
-    自动failover;
-
-    支持长连接。     
-
-    FastDHT集群由一个或多个组（group）组成，每个组由一台或多台服务器组成，同组服务器上存储的数据是相同的，数据同步只在同组的服务器之间进行。组内各个服务器是对等的，对数据进行存取时，可以根据key的hash值来决定使用哪台服务器。数据同步采用推（Push）的方式，由源服务器主动将数据同步到本组的其他服务器。FastDHT集群由一个或多个组（group）组成，每个组由一台或多台服务器组成，同组服务器上存储的数据是相同的，数据同步只在同组的服务器之间进行。组内各个服务器是对等的，对数据进行存取时，可以根据key的hash值来决定使用哪台服务器。数据同步采用推（Push）的方式，由源服务器主动将数据同步到本组的其他服务器。
-
-      FastDHT由客户端决定应该选择哪台服务器，为例避免查表，应该根据key的hash code来选择服务器，算法描述如下： 
-
-  1. 计算出key的hash值（hash_code） 
-
-  2. group_index = hash_code % group_count 
-
-  3. new_hash_code = hash_code高16位和低16位互换 
-
-  4. server_index = new_hash_code % 组内server_count 
-
-      计算server_index和group_index时使用了不同的hash code，是因为如果group_count和组内server_count相等，例如都等于2，那么对于一个组来说，任何key值都将选中其中一台固定的服务器（server_index == group_index)。
-      
-      
-      FastDHT is a high performance distributed hash table, it can be used as a cache system or a persistent storage for key value pairs.
-
-FastDHT is a high performance distributed hash table (DHT) which based key value pairs. It can store mass key value pairs such as filename mapping, session data and user related data.
-
-FastDHT uses the Berkeley DB as data storage to support mass data and libevent as network IO to support huge connections. FastDHT implements data replication by it's binlog file, so it only uses the basic storage function of the Berkeley DB.
-
-FastDHT cluster composes of one or many groups and a group contains one or more servers. The data on a group is same and data is synchronized only among the servers of the same group. The servers of a group are coordinative, so which server is selected to access according to the key's hash code. The source server pushes the data to other servers in the group.
-
-The client of FastDHT decides which server to be selected. When select which server to access, we use the key's hash code to avoid lookuping the constrast table. The step of the algorithm is: * calculate the hash code of the key * group_index = hash_code % group_count * new_hash_code = (hash_code << 16) | (hash_code >> 16) * server_index = new_hash_code % server_count_in_the_group
-
-In FastDHT, the key contains three fields: namespace, object ID and key name. These three concepts are like those of the database system: * namespace vs database name * object ID vs table name * key name vs field name The purpose of namespace is resolving the probable data conflict between multiple users such as the different applications or products. The purpose of object ID is convenient for organization and management of object related data such as user's data and increasing the whole performance. The sytem is more flexible as namespace and object ID are imported. These two fields can be empty in some cases. The input of the hash function (it's result is hash code) is: If namespace and object ID are not empty, the concatenation of these two fields, or the key name.
-
-FastDHT imports the concept of logic group which is used to avoid re-hashing when the system scales. A physical group is composed of one or more real servers. It can contains one or more logic groups. A FastDHT server supports several logic groups and the data of a logic group is stored to a single Berkeley DB file. This design provides more convenience for scaling. We can use a larger number of logic groups at the beginning. When system scaled, one or more logic groups are migrated to the new physical group(s). All things we need to do are: * copy the Berkeley DB data file to the new servers * change the config file * restart the programs of the FastDHT servers * restart the programs of the FastDHT clients if necessary
-
-FastDHT supports timeout and every key has timeout attribute. FastDHT can be used to store session data which is more efficient and more simple than the traditional database.
-
-
-2 FastDHT安装
-
-安装 libevent
-
-FastDHT是使用libevent来处理网络io。
-
+二、 FastDHT安装步骤（centos7）
+1 安装libevent
 # download libevent-1.4.8-stable.tar.gz from website
 # http://monkey.org/~provos/libevent/
 tar xzf libevent-1.4.8-stable.tar.gz
@@ -65,18 +8,18 @@ cd libevent-1.4.8-stable
 make && make install
 
 或者直接 yum install libevent
-提示 ：下载安装libevent-dev工具包，如果不安装该工具时，会在安装FastDHT报错
 
-fastdht fatal error: event.h: No such file or directory
-安装 Berkeley DB
-
-下载 
-http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/overview/index.html
+2 安装 Berkeley DB
+#Download http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/overview/index.html
 然后进入其build_unix目录，输入命令：
 $  ../dist/configure --prefix=/usr/local/berkeley-db
 检查系统环境并产生编译程序所需的文件
-安装FastDHT
 
+接着就可以:
+$ make
+$ make install
+
+3. install FastDHT
 # download FastDHT from website
 # http://code.google.com/p/fastdht/downloads/list
 # then unpack the source package as:
@@ -84,68 +27,8 @@ $  ../dist/configure --prefix=/usr/local/berkeley-db
 tar xzf FastDHT_v1.09.tar.gz
 cd FastDHT
 ./make.sh; ./make.sh install
- 
 
-3 FastDHT配置
+警告 如果安装FastDHT报fastdht fatal error: event.h: No such file or directory错误
+则是libevent-dev未安装
+yum install libevent-dev*
 
-将配置文件 fdht_client.conf、fdhtd.conf、fdht_servers.conf复制到 /etc/fdht目录下（如果目录不存在则创建）
-
-修改fdhtd.conf配置
-
-修改FastDHT服务的端口号 、FastDHT的存储目录、最后一行包含服务配置文件
-
-
-
-
-
-修改fdht_servers.conf配置
-
-在这里配置服务（在这里仅仅是配置一个FastDHT服务，如果要是配置多个请在这里进行配置）
-
-相同组 实现了服务功能，当动态往一个组添加服务器的时候，后台会自动的将该组存储的数据复制到新添加的服务器下。
-
-不同组 实现了分片功能。
-
-
-
-修改fdht_client.conf配置
-
- 
-
-4 FastDHT启动测试
-
-FastDHT启动
-
-/usr/local/bin/fdhtd /etc/fdht/fdhtd.conf 
-
-启动完成之后，可以查看日志
-
-vim /opt/fastdht/logs/fdhtd.log
-
-
-
-如果没有报错，那么说明启动成功。
-
-FastDHT客户端测试
-
-
-
-5 FastDHT配合FastDFS去重
-
-当我们向FastDFS服务器中上传多次相同的文件的时候，存储服务器storage会保存多份文件的copy，这样造成了硬盘的浪费和cup资源的消耗。为了解决这个问题，FastDFS开发者开发了FastDHT来去除重复的文件。当我们向storage存储文件的时候，storage服务首先会检测是否存在该文件（通过计算文件的哈希值来实现），如果存在则直接返回文件的路径，如果不存在则进行文件保存。
-
-
-
-修改FastDFS storage.conf配置文件
-
-修改 check_file_duplicate
-
-修改 key_namespace
-
-修改 keep_alive
-
-修改  #include /etc/fdht/fdht_servers.conf
-
-
-
- 

@@ -32,6 +32,12 @@ public class FastDHTServiceImplTest {
     }
 
     @Test
+    public void delete() {
+        int value = fastDHTService.delete("ganliang123456");
+        System.out.println(value);
+    }
+
+    @Test
     public void getWithExpires() {
         String value = fastDHTService.get("ganliang",1);
         System.out.println(value);
