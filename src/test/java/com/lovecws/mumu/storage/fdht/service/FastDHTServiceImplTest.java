@@ -21,20 +21,23 @@ public class FastDHTServiceImplTest {
 
     @Test
     public void set(){
-        int set = fastDHTService.set("ganliang123456", "lovecws");
-        System.out.println(set);
+        for (int i = 0; i < 10000; i++) {
+            int value = fastDHTService.set("ganliang"+i, "lovecws"+i);
+            System.out.println(i + ":set:" + value);
+        }
     }
 
     @Test
     public void get() {
-        String value = fastDHTService.get("ganliang123456");
-        System.out.println(value);
+        for(int i=0;i<1000;i++){
+            String value = fastDHTService.get("ganliang"+i);
+            System.out.println(i+":get:"+value);
+        }
     }
 
     @Test
     public void delete() {
-        int value = fastDHTService.delete("ganliang123456");
-        System.out.println(value);
+        int value = fastDHTService.delete("ganliang");
     }
 
     @Test
@@ -45,7 +48,7 @@ public class FastDHTServiceImplTest {
 
     @Test
     public void stat() {
-        Hashtable hashtable = fastDHTService.stat(0);
+        Hashtable hashtable = fastDHTService.stat(1);
         System.out.println(hashtable);
     }
 
